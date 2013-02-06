@@ -1,0 +1,8 @@
+shellAI
+\documentation
+\sexp
+\muparser
+\Visual Studio
+submit
+.o
+\sampleAIs

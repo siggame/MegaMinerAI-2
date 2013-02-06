@@ -1,0 +1,79 @@
+# Definitions of space and distance
+    * The game takes place on a grid of squares, with the lower left corner being (0,0) and the upper right corner being (25, 25).  This is a 26 by 26 grid.
+    * All distance's are Manhattan distance, which is the number of squares that would have to be traversed to get from beginning to end traveling only up, down, left, or right.
+    * Adjacent means a Manhattan distance of 1, which is one square up, down, left, or right.  Diagonal squares are NOT adjacent.
+
+# Initial Conditions
+    * Player 0 starts with a red unit in (0,0) and a green unit in (1,0).
+    * Player 1 starts with a red unit in (25,25) and a green unit in (24,25).
+    * A build point is given to the unit in (25,25).
+    * Player 0 takes gets the first turn.
+
+# Win Conditions
+    * The game ends when one team loses its last unit or at 400 turns.
+    * The player who has earned the most build points overall (spend or unspent) wins the game.
+    * The player who did not get to have the first turn wins ties.
+
+# Unit Stats
+    * The formulas below are a guideline - they may have changed since the creation of this document. For an up to date listing of formulas, call Parser::instance()->formulas() in your code.
+    
+    * R = red, G = green, B = blue, Y = yellow
+    * Max Health:    (15*G)+50
+    * Max Moves:     (1*B)+2
+    * Attack Power:  (6*R)+20
+    * Attack Range:  (1*Y)+1
+    * Heal Power:    (8*min(G, Y))+0
+    * Poison Power:  (6*min(R, B))+0
+    * Max Regen:     (3*min(B, G))+0
+    * Splash Damage: (4*min(Y, R))+0
+    * Level = R + G + B + Y
+    * MaxBuildPoints = (Level * 3)    
+
+# Beginning of Each Turn
+    * For each unit under the current player's control
+          o Each recieves its maximum number of turns
+          o Each is given one action. (used for attacking, combining, or building)
+          o Each is given HP equal to its regen minus its poison points
+          o Poison points for each unit is divided by two and rounded down
+          o Each on a build zone recieves build points
+
+# End of Each Turn
+    * All units lose all of their moves and actions.
+
+# Reproduction / Building
+    * Each unit will be able to reproduce by using a build ability and targeting an empty adjacent square.  This unit will be referred to as the builder.
+    * The builder must use an action, and must use build points equal to the maximum number of build points that the builder can hold.
+    * A new unit is created in the target location with no moves or actions and with the following color components
+          o New unit's Red is equal to Builder's Yellow
+          o New unit's Blue is equal to Builder's Red
+          o New unit's Green is equal to Builder's Blue
+          o New unit's Yellow is equal to Builder's Green
+    * Units of any level can use the build ability
+
+# Combining
+    * Any unit may use the combine ability on any adjacent square containing an ally.
+    * Both the caster and the target of combine must use an action.
+
+# Deleveling / Uncombining
+    * There will be no way to delevel or uncombine.  If you lose all your level 1 units, you have a slight reproductive disadvantage, but no critical functionality is lost.
+
+# Movement
+    * Only one unit is allowed in each square.
+    * Each player can move every unit under his or her control every turn.
+    * At the beginning of each turn, every unit under the current player's control is given their maximum number of moves.
+    * With each move, a unit may move a single square up, down, left, or right, but NOT diagonally.
+
+# Combat
+    * Attacking requires an action.  (attacking does not require a move)
+    * Attacks will target a square on the board
+    * At least one of the following conditions must be true or the attack will fail.
+          o The target must be an adjacent square
+          o The target must be within the attacker's range (using Manhattan distance) and the attacker must have its maximum number of moves available for use. If a unit has moved, it cannot perform a ranged attack.
+
+    * The attacker loses all remaining moves.
+    * If the target contains no allies
+          o Any enemy in the target square recieve damage equal to the attacker's Attack.
+          o Any enemy in the target square recieve poison points equal to the attacker's Poison.
+          o Any enemies in adjacent (NOT diagonal) squares will recieve damage equal to the attacker's Splash.
+    * If the target contains an ally unit
+          o The allied unit recieves HP equal to the attacker's Heal.
